@@ -1,38 +1,64 @@
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
+import Student.ElementarySchoolStudent;
+import Student.StudentInput;
+import Student.StudentKind;
+import Student.UniversityStudent;
 
-import Student.Student;
+public class MenuManager implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7833492398666257821L;
 
-public class MenuManager {
-	ArrayList<Student> students = new ArrayList<Student>();
+	ArrayList<StudentInput> students = new ArrayList<StudentInput>();
 	
-	Scanner input;
+	transient Scanner input;
 	
 	MenuManager(Scanner input){
 		this.input = input;
 	}
 	public void addStudent() {
 		int kind = 0;
-		Student student;
-		while(kind != 1 && kind != 2) {
-			System.out.print("1 for University:");
-			System.out.print("2 for High School:");
-			System.out.print("Select num for Student Kind between 1 ~ 2:");
+		StudentInput studentInput;
+		while(kind != 1 && kind != 2 && kind != 3) {
+			try {
+			System.out.println("1 for University:");
+			System.out.println("2 for High School:");
+			System.out.println("3 for elementary School:");
+			System.out.print("Select num for Student Kind between 1 ~ 3:");
 			kind = input.nextInt();
-			if (kind == 1) {
-				student = new Student();
-				student.getUserInput(input);
-				students.add(student);
+			if (kind == 1){
+				
+				studentInput = new UniversityStudent(StudentKind.University);
+				studentInput.getUserInput(input);
+				students.add(studentInput);
 				break;
 			}
 			else if (kind ==2) {
-				student = new HighSchoolStudent();
-				student.getUserInput(input);
-				students.add(student);
+				studentInput = new HighSchoolStudent(StudentKind.HighSchool);
+				studentInput.getUserInput(input);
+				students.add(studentInput);
+				break;
+			}
+			else if (kind ==3) {
+				studentInput = new ElementarySchoolStudent(StudentKind.ElementarySchool);
+				studentInput.getUserInput(input);
+				students.add(studentInput);
 				break;
 			}
 			else {
-				System.out.print("Select num for Student Kind:");
+				System.out.print("Select num for Student Kind 1 ~ 3:");
+			}
+		}
+			catch(InputMismatchException e) {
+				System.out.println("Please put an integer between 1 ~ 3!");
+				if(input.hasNext()) {
+					input.next();
+			}
+				kind = -1;
 			}
 		}
 		
@@ -40,6 +66,10 @@ public class MenuManager {
 	public void deleteStudent() {
 		System.out.print("student ID :");
 		int studentId = input.nextInt();
+		int index = findIndex(studentId);
+		removefromStudents(index, studentId);
+	}
+	public int findIndex(int studentId) {
 		int index = -1;
 		for (int i =0; i<students.size(); i++) {
 			if( students.get(i).getId() == studentId) {
@@ -47,62 +77,66 @@ public class MenuManager {
 				break;
 			}
 		}
+		return index;
+	}
+	
+	public int removefromStudents(int index, int studentId) {
 		if (index >= 0) {
 			students.remove(index);
 			System.out.println("the student" + studentId + "is deleted");
+			return 1;
 		}
 		else {
 			System.out.println("the student has been registered");
-			return;
+			return -1;
 		}
-	}
-public void editStudent() {
-	System.out.print("Student ID :");
-	int studentId = input.nextInt();
-	for(int i=0; i<students.size(); i++) {
-		Student student = students.get(i);
-	if(student.getId() == studentId) {
-		int num=-1;
 		
-		while(num != 5) {
-			System.out.println("1. Edit Id");
-			System.out.println("2. Edit Name");
-			System.out.println("3. Edit Email");
-			System.out.println("4. Edit Phone");
-			System.out.println("5. Exit");
-			num = input.nextInt();
-			if(num == 1) {
-				System.out.print("Student Id:");
-				int id = input.nextInt();
-				student.setId(id);
+	}
+	public void editStudent() {
+		System.out.print("Student ID :");
+		int studentId = input.nextInt();
+		for(int i=0; i<students.size(); i++) {
+			StudentInput student = students.get(i);
+		if(student.getId() == studentId) {
+			int num=-1;
+			
+			while(num != 5) {
+				showEditMenu();
+				num = input.nextInt();
+				switch(num) {
+				case 1:
+					student.setStudentID(input);
+					break;
+				case 2:
+					student.setStudentName(input);
+					break;
+				case 3:
+					student.setStudentEmail(input);
+					break;
+				case 4:
+					student.setStudentPhone(input);
+					break;
+				default:
+					continue;
+				}
 			}
-			else if (num == 2) {
-				System.out.print("student Name:");
-				String name = input.next();
-				student.setName(name);
-			}
-			else if (num == 3) {
-				System.out.print("Email address:");
-				String email = input.next();
-				student.setEmail(email);
-			}
-			else if (num == 4) {
-				System.out.print("Phone number:");
-				String phone = input.next();
-				student.setPhone(phone);
-			}
-			else {
-				continue;
-			}
+			break;
 		}
-		break;
+		}
 	}
+	public void viewStudents() {
+		for(int i=0; i<students.size(); i++) {
+			students.get(i).printInfo();
+		}
 	}
-}
-public void viewStudents() {
-	for(int i=0; i<students.size(); i++) {
-		students.get(i).printInfo();
-	}
-}
 	
+	public void showEditMenu() {
+		System.out.println("1. Edit Id");
+		System.out.println("2. Edit Name");
+		System.out.println("3. Edit Email");
+		System.out.println("4. Edit Phone");
+		System.out.println("5. Exit");
+		
+	}
+		
 }
